@@ -1,0 +1,34 @@
+name: Generate LeetCode rating chart
+
+on:
+  schedule:
+    - cron: "37 3 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "scripts/generate_leetcode_chart.mjs"
+
+jobs:
+  generate:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate chart
+        run: node scripts/generate_leetcode_chart.mjs
+
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/leetcode-chart.svg
+          git diff --staged --quiet || git commit -m "chore: refresh LeetCode rating chart"
+          git push
